@@ -1,0 +1,173 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "capstone",
+      "description": "",
+      "version": "1.0.0",
+      "contact": {}
+    },
+    "servers": [
+      {
+        "url": "http://localhost:5000"
+      }
+    ],
+    "paths": {
+      "/": {
+        "get": {
+          "tags": [
+            "Task Management"
+          ],
+          "summary": "getTasksbyId",
+          "description": "",
+          "operationId": "get",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "example": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Task Management"
+          ],
+          "summary": "createTask",
+          "description": "",
+          "operationId": "post",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "example": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Task Management"
+          ],
+          "summary": "updatetask",
+          "description": "",
+          "operationId": "put",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "example": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/profile": {
+        "get": {
+          "tags": [
+            "Auth"
+          ],
+          "summary": "getprofile",
+          "description": "",
+          "operationId": "getapiauthprofile",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "example": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Auth"
+          ],
+          "summary": "updateProfile",
+          "description": "",
+          "operationId": "putapiauthprofile",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "example": {}
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "name": "Nikhil Tedla",
+                    "email": "nikhiltedla123@gmail.com",
+                    "password": "demo",
+                    "adminInviteToken": "1234"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {},
+      "securitySchemes": {
+        "basicAuth": {
+          "type": "http",
+          "scheme": "basic"
+        },
+        "digestAuth": {
+          "type": "http",
+          "scheme": "digest"
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Auth",
+        "description": ""
+      },
+      {
+        "name": "User Management",
+        "description": ""
+      },
+      {
+        "name": "Task Management",
+        "description": ""
+      }
+    ]
+  }
