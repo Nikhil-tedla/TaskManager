@@ -1,4 +1,5 @@
 const Task = require("../models/Task");
+const User=require("../models/User")
 const dotenv = require('dotenv');
 const getTasks = async (req, res) => {
     try {
@@ -333,6 +334,61 @@ const getUserDashboardData = async (req, res) => {
         })
     }
 }
+const shareTask=async (req,res)=>{
+    const { taskId, userId ,senderId} = req.body;
+    
+    
+  try {
+    
+    
+    const task = await Task.findById(taskId).populate(
+        "assignedTo",
+        "name email"
+    );
+    if (!task) return res.status(404).send('Task not found');
+    
+    
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).send('User not found');
+    // const alreadyShared = user.sharedTasks.some(
+    //     (entry) => entry.task.toString() === taskId
+    //   );
+    
+    //   if (!alreadyShared) {
+    //     user.sharedTasks.push({
+    //       task: taskId,
+          
+    //     });
+    // }
+    
+        
+    // if (!user.sharedTasks.includes(taskId)) {
+        
+    //     user.sharedTasks.push(taskId);
+    //     await user.save();
+    // }
+    const isAlreadyShared = user.sharedTasks.some(
+        (task) => task.taskId.toString() === taskId.toString() && task.sharedBy.toString() === senderId.toString()
+      );
+      
+      if (!isAlreadyShared) {
+        user.sharedTasks.push({ taskId, sharedBy: senderId });
+        
+        await user.save();
+      }
 
-module.exports = { getTaskById, getTasks, updateTask, getDashboardData, getUserDashboardData, deleteTask, createTask }
+    
+    //   if (!task.sharedWith.includes(userId)) {
+    //     task.sharedWith.push(userId); 
+    //     await task.save(); 
+    //   }
+
+    res.status(200).send('Task shared successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+}
+
+module.exports = { getTaskById, getTasks, updateTask, getDashboardData, getUserDashboardData, deleteTask, createTask,shareTask }
 

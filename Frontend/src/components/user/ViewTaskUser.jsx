@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Pencil, Save } from "lucide-react";
+import { Pencil, Save, Share2 } from "lucide-react";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
+import { useAuth } from "../../context/AuthContext";
 const animatedComponents = makeAnimated();
 
 
@@ -11,6 +12,9 @@ const ViewTaskUser = () => {
     const [activeField, setActiveField] = useState("");
     const [filterStatus, setFilterStatus] = useState("All");
     const [filterDate, setFilterDate] = useState("");
+    const [showShareBox, setShowShareBox] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const shareBoxRef = useRef(null);
 
     const [statusSummary, setStatusSummary] = useState({});
     const [loading, setLoading] = useState(true);
@@ -18,13 +22,15 @@ const ViewTaskUser = () => {
     const [formData, setFormData] = useState({});
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const { user } = useAuth();
+
     const statusColors = {
         "All": "bg-blue-500",
         "Pending": "bg-yellow-500",
         "In Progress": "bg-orange-500",
         "Completed": "bg-green-500",
     };
-    
+
 
     const statusCounts = {
         "All": statusSummary.all,
@@ -33,7 +39,7 @@ const ViewTaskUser = () => {
         "Completed": statusSummary.completedTasks,
     };
 
-    
+
     const handleEdit = (task) => {
         setEditingTaskId(task._id);
         setFormData({
@@ -42,7 +48,7 @@ const ViewTaskUser = () => {
             status: task.status,
             priority: task.priority,
             dueDate: task.dueDate.split("T")[0],
-            
+
         });
     };
 
@@ -52,10 +58,11 @@ const ViewTaskUser = () => {
             || task.priority.toLowerCase().includes(searchTerm.toLowerCase()) || task.status.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = filterStatus === "All" || task.status === filterStatus;
         const matchesDate = !filterDate || task.dueDate?.slice(0, 10) <= filterDate;
+
         return matchesSearch && matchesStatus && matchesDate;
     }
-
     );
+    const filteredUsers = users.filter(u => u.value !== user._id);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -67,7 +74,7 @@ const ViewTaskUser = () => {
         try {
             const updatedPayload = {
                 ...formData,
-                
+                assignedTo: formData.assignedTo.map(user => user.value)
             };
             await axios.put(`http://localhost:5000/api/tasks/${taskId}`, updatedPayload, {
                 headers: {
@@ -114,7 +121,7 @@ const ViewTaskUser = () => {
             label: user.name
         }));
 
-       
+
         setUsers(formatted);
 
 
@@ -123,14 +130,26 @@ const ViewTaskUser = () => {
 
     useEffect(() => {
         fetchTasks(),
-        fetchUsers()
+        fetchUsers(),
+        handleClickOutside()
 
 
+        document.addEventListener('mousedown', handleClickOutside);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
 
 
 
 
     }, []);
+    const handleClickOutside = (event) => {
+        if (shareBoxRef.current && !shareBoxRef.current.contains(event.target)) {
+          setShowShareBox(null);  // Close the share box
+        }
+      };
     const formatTitle = (str) => {
         return str
             .replace(/([A-Z])/g, " $1")
@@ -138,6 +157,30 @@ const ViewTaskUser = () => {
             .replace("Alltasks", "All Tasks");
         // // };
     }
+    const handleShareClick = async (taskId) => {
+        if (showShareBox === taskId) {
+            setShowShareBox(null);  // Close if clicked again
+          } else {
+            setShowShareBox(taskId);
+          }
+        await fetchUsers();
+    };
+    const handleShare = async (tid) => {
+        if (!selectedUser) return;
+        await axios.post(`http://localhost:5000/api/tasks/share`, {
+            userId: selectedUser.value,
+            taskId: tid,
+            senderId:user._id
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        setShowShareBox(null);
+        setSelectedUser(null);
+    };
+
     const StatCard = ({ title, value, color, onClick, isActive }) => (
         <div className={`p-4 rounded-xl shadow-md cursor-pointer transition ${isActive ? "ring-1 ring-black-500 scale-105" : ""
             } ${color}`} onClick={onClick}>
@@ -162,14 +205,14 @@ const ViewTaskUser = () => {
                         className="border rounded p-1"
                     />
                 </div>
-                <input
-                    type="text"
-                    placeholder="Search tasks..."
-                    className="px-3 py-1 border rounded-md text-sm w-100"
-                    onChange={handleSearchChange}
-                    value={searchTerm}
-                /></div>
-                
+                    <input
+                        type="text"
+                        placeholder="Search tasks..."
+                        className="px-3 py-1 border rounded-md text-sm w-100"
+                        onChange={handleSearchChange}
+                        value={searchTerm}
+                    /></div>
+
 
             </div>
 
@@ -214,6 +257,24 @@ const ViewTaskUser = () => {
                                 <>
                                     <button onClick={() => handleEdit(task)} className="text-blue-500"><Pencil size={25} /></button>
                                     
+                                    <button onClick={() => handleShareClick(task._id)} className="text-blue-500"><Share2 size={25} /></button>
+                                    {showShareBox === task._id && (
+                                        // <div className="absolute z-10 bg-white border rounded p-2 shadow w-64">
+                                        <div  ref={shareBoxRef} className="absolute z-10  right-0 bg-white border rounded p-2 shadow w-64">
+                                            <Select
+                                                options={filteredUsers}
+                                                onChange={setSelectedUser}
+                                                placeholder="Search user..."
+                                            />
+                                            <button
+                                                onClick={() => handleShare(task._id)}
+                                                className="mt-2 px-3 py-1 bg-blue-600 text-white rounded"
+                                            >
+                                                Share
+                                            </button>
+                                        </div>
+                                    )}
+
                                 </>
                             )}
                         </div>
@@ -222,15 +283,28 @@ const ViewTaskUser = () => {
                             <>  {activeField && (
                                 <p className="text-sm text-blue-600 mb-2">Currently editing: <strong>{activeField}</strong></p>
                             )}
-                                
+
                                 <select name="status" className="w-2/3 mb-1 border rounded p-1" value={formData.status} onChange={handleChange} onFocus={() => setActiveField("Status")}>
                                     <option>Pending</option>
                                     <option>In Progress</option>
                                     <option>Completed</option>
                                 </select>
-                                
+                                <Select
+                                    closeMenuOnSelect={false}
+                                    components={animatedComponents}
+                                    isMulti
+                                    options={filteredUsers}
+                                    value={formData.assignedTo}
+                                    onChange={(selected) =>
+                                        setFormData((prev) => ({ ...prev, assignedTo: selected }))
+                                    }
+                                    placeholder="Assign users..."
 
-                                
+                                    className="w-2/3 mb-1"
+                                />
+
+
+
                             </>
                         ) : (
                             <>

@@ -1,140 +1,1480 @@
 {
-    "openapi": "3.0.3",
-    "info": {
-      "title": "capstone",
-      "description": "",
-      "version": "1.0.0",
-      "contact": {}
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Task Manager API",
+    "description": "API documentation for the Task Manager application",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and user profile operations"
     },
-    "servers": [
-      {
-        "url": "http://localhost:5000"
-      }
-    ],
-    "paths": {
-      "/": {
-        "get": {
-          "tags": [
-            "Task Management"
-          ],
-          "summary": "getTasksbyId",
-          "description": "",
-          "operationId": "get",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "example": {}
-                  }
-                }
-              }
-            }
+    {
+      "name": "User Management",
+      "description": "Operations for managing users"
+    },
+    {
+      "name": "Task Management",
+      "description": "Operations for managing tasks"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Get all users",
+        "description": "Get a list of all users with member role and their task counts",
+        "operationId": "getUsers",
+        "security": [
+          {
+            "bearerAuth": []
           }
-        },
-        "post": {
-          "tags": [
-            "Task Management"
-          ],
-          "summary": "createTask",
-          "description": "",
-          "operationId": "post",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
                     "type": "object",
-                    "example": {}
-                  }
-                }
-              }
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "Task Management"
-          ],
-          "summary": "updatetask",
-          "description": "",
-          "operationId": "put",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "example": {}
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/api/auth/profile": {
-        "get": {
-          "tags": [
-            "Auth"
-          ],
-          "summary": "getprofile",
-          "description": "",
-          "operationId": "getapiauthprofile",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "example": {}
-                  }
-                }
-              }
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "Auth"
-          ],
-          "summary": "updateProfile",
-          "description": "",
-          "operationId": "putapiauthprofile",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "example": {}
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "example": "60d21b4667d0d8992e610c85"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Nikhil"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "Nikhil@gmail.com"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "member"
+                      },
+                      "pendingTasks": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "InProgressTasks": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "completedTasks": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
                   }
                 }
               }
             }
           },
-          "requestBody": {
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Get user by ID",
+        "description": "Get a specific user by their ID",
+        "operationId": "getUserById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
             "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "example": {
-                    "name": "Nikhil Tedla",
-                    "email": "nikhiltedla123@gmail.com",
-                    "password": "demo",
-                    "adminInviteToken": "1234"
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "No user found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Delete user by ID",
+        "description": "Delete a specific user by their ID (admin only)",
+        "operationId": "deleteUserById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "No user found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new user",
+        "description": "Create a new user account with member or admin role",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nikhil"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "Nikhil@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "adminInviteToken": {
+                    "type": "string",
+                    "description": "Token required to register as admin",
+                    "example": "1234"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "60d21b4667d0d8992e610c85"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nikhil"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "Nikhil@gmail.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "member"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User Email already exists"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login user",
+        "description": "Authenticate a user and return a token",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "Nikhil@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "60d21b4667d0d8992e610c85"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nikhil"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "Nikhil@gmail.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "member"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid mail or password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/tasks": {
+      "get": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Get all tasks",
+        "description": "Get all tasks (admin: all tasks, member: assigned tasks only)",
+        "operationId": "getTasks",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter tasks by status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "In Progress",
+                "Completed"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasks retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Task"
+                      }
+                    },
+                    "statusSummary": {
+                      "type": "object",
+                      "properties": {
+                        "all": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "pendingTasks": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "inProgressTasks": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "completedTasks": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Create a new task",
+        "description": "Create a new task (admin only)",
+        "operationId": "createTask",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Complete project documentation"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Write comprehensive documentation for the project"
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2023-12-31T23:59:59Z"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "Low",
+                      "Medium",
+                      "High"
+                    ],
+                    "example": "Medium"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Pending",
+                      "In Progress",
+                      "Completed"
+                    ],
+                    "example": "Pending"
+                  },
+                  "assignedTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "60d21b4667d0d8992e610c85",
+                      "60d21b4667d0d8992e610c86"
+                    ]
+                  }
+                },
+                "required": [
+                  "title",
+                  "dueDate",
+                  "assignedTo"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Created task successfully"
+                    },
+                    "task": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Assigned to must be an array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Get task by ID",
+        "description": "Get a specific task by its ID",
+        "operationId": "getTaskById",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Task ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Update task",
+        "description": "Update a specific task by its ID",
+        "operationId": "updateTask",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Task ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Updated task title"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Updated task description"
+                  },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2023-12-31T23:59:59Z"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "Low",
+                      "Medium",
+                      "High"
+                    ],
+                    "example": "High"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Pending",
+                      "In Progress",
+                      "Completed"
+                    ],
+                    "example": "In Progress"
+                  },
+                  "assignedTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "60d21b4667d0d8992e610c85",
+                      "60d21b4667d0d8992e610c86"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task updated"
+                    },
+                    "updatedTask": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Assigned to must be array of Id's"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Delete task",
+        "description": "Delete a specific task by its ID (admin only)",
+        "operationId": "deleteTask",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Task ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Deleted Task Successfully"
+                    },
+                    "task": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Task not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/tasks/dashboard-data": {
+      "get": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Get dashboard data",
+        "description": "Get task statistics and charts data for admin dashboard",
+        "operationId": "getDashboardData",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "alltasks": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "pendingTasks": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "inProgressTasks": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "completedTasks": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "overdueTask": {
+                          "type": "number",
+                          "example": 2
+                        }
+                      }
+                    },
+                    "charts": {
+                      "type": "object",
+                      "properties": {
+                        "taskDistribution": {
+                          "type": "object",
+                          "properties": {
+                            "Pending": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "InProgress": {
+                              "type": "number",
+                              "example": 3
+                            },
+                            "Completed": {
+                              "type": "number",
+                              "example": 3
+                            },
+                            "All": {
+                              "type": "number",
+                              "example": 10
+                            }
+                          }
+                        },
+                        "taskPriorityLevels": {
+                          "type": "object",
+                          "properties": {
+                            "Low": {
+                              "type": "number",
+                              "example": 3
+                            },
+                            "Medium": {
+                              "type": "number",
+                              "example": 5
+                            },
+                            "High": {
+                              "type": "number",
+                              "example": 2
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "recentTasks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "example": "Complete project documentation"
+                          },
+                          "status": {
+                            "type": "string",
+                            "example": "Pending"
+                          },
+                          "priority": {
+                            "type": "string",
+                            "example": "Medium"
+                          },
+                          "dueDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-12-31T23:59:59Z"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-11-15T10:30:00Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/tasks/user-dashboard-data": {
+      "get": {
+        "tags": [
+          "Task Management"
+        ],
+        "summary": "Get user dashboard data",
+        "description": "Get task statistics and charts data for user dashboard",
+        "operationId": "getUserDashboardData",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User dashboard data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "alltasks": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "pendingTasks": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "inProgressTasks": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "completedTasks": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "overdueTask": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    },
+                    "charts": {
+                      "type": "object",
+                      "properties": {
+                        "taskDistribution": {
+                          "type": "object",
+                          "properties": {
+                            "Pending": {
+                              "type": "number",
+                              "example": 2
+                            },
+                            "InProgress": {
+                              "type": "number",
+                              "example": 2
+                            },
+                            "Completed": {
+                              "type": "number",
+                              "example": 1
+                            },
+                            "All": {
+                              "type": "number",
+                              "example": 5
+                            }
+                          }
+                        },
+                        "taskPriorityLevels": {
+                          "type": "object",
+                          "properties": {
+                            "Low": {
+                              "type": "number",
+                              "example": 1
+                            },
+                            "Medium": {
+                              "type": "number",
+                              "example": 3
+                            },
+                            "High": {
+                              "type": "number",
+                              "example": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "recentTasks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "example": "Complete project documentation"
+                          },
+                          "status": {
+                            "type": "string",
+                            "example": "Pending"
+                          },
+                          "priority": {
+                            "type": "string",
+                            "example": "Medium"
+                          },
+                          "dueDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-12-31T23:59:59Z"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-11-15T10:30:00Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get user profile",
+        "description": "Get the profile of the authenticated user",
+        "operationId": "getUserProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Update user profile",
+        "description": "Update the profile of the authenticated user",
+        "operationId": "updateUserProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nikhil Updated"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "Nikhilupdated@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "newpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "60d21b4667d0d8992e610c85"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nikhil Updated"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "Nikhilupdated@gmail.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "member"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId",
+            "description": "Unique identifier for the user"
+          },
+          "name": {
+            "type": "string",
+            "description": "User's full name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password (hashed)",
+            "writeOnly": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "member"
+            ],
+            "default": "member",
+            "description": "User's role in the system"
+          },
+          "sharedTasks": {
+            "type": "array",
+            "description": "Tasks shared with this user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "taskId": {
+                  "type": "string",
+                  "format": "ObjectId",
+                  "description": "ID of the shared task"
+                },
+                "sharedBy": {
+                  "type": "string",
+                  "format": "ObjectId",
+                  "description": "ID of the user who shared the task"
+                }
+              },
+              "required": [
+                "taskId",
+                "sharedBy"
+              ]
+            }
+          },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp when the user was created"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp when the user was last updated"
+            }
+          },
+          "required": [
+            "name",
+            "email",
+            "password"
+          ]
+        },
+        "Task": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "format": "ObjectId",
+              "description": "Unique identifier for the task"
+            },
+            "title": {
+              "type": "string",
+              "description": "Title of the task"
+            },
+            "description": {
+              "type": "string",
+              "description": "Detailed description of the task"
+            },
+            "dueDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Due date for the task"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "default": "Medium",
+              "description": "Priority level of the task"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "In Progress",
+                "Completed"
+              ],
+              "default": "Pending",
+              "description": "Current status of the task"
+            },
+            "assignedTo": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "description": "Array of user IDs the task is assigned to"
+            },
+            
+            "createdBy": {
+              "type": "string",
+              "format": "ObjectId",
+              "description": "User ID of the task creator"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp when the task was created"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp when the task was last updated"
+            }
+          },
+          "required": [
+            "title",
+            "dueDate"
+          ]
+        }
+      },
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "JWT Authorization header using the Bearer scheme"
+        }
+      },
+      "responses": {
+        "UnauthorizedError": {
+          "description": "Authentication information is missing or invalid",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Not authorized, no token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ForbiddenError": {
+          "description": "User does not have permission to access the resource",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Access denied, admin only"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ServerError": {
+          "description": "Internal server error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Server Error"
+                  },
+                  "error": {
+                    "type": "string"
                   }
                 }
               }
@@ -142,32 +1482,5 @@
           }
         }
       }
-    },
-    "components": {
-      "schemas": {},
-      "securitySchemes": {
-        "basicAuth": {
-          "type": "http",
-          "scheme": "basic"
-        },
-        "digestAuth": {
-          "type": "http",
-          "scheme": "digest"
-        }
-      }
-    },
-    "tags": [
-      {
-        "name": "Auth",
-        "description": ""
-      },
-      {
-        "name": "User Management",
-        "description": ""
-      },
-      {
-        "name": "Task Management",
-        "description": ""
-      }
-    ]
+    }
   }

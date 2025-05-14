@@ -7,8 +7,9 @@ const taskSchema = new mongoose.Schema({
   priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
   status: { type: String, enum: ['Pending', 'In Progress', 'Completed'], default: 'Pending' },
   assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  sharedWith:[{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
-const task=mongoose.model('Task', taskSchema);
+const task = mongoose.models.Task || mongoose.model('Task', taskSchema);
+// const task=mongoose.model('Task', taskSchema);
 module.exports = task

@@ -13,6 +13,7 @@ import CreateTaskPage from "./components/admin/CreateTaskPage";
 import ViewTaskPage from "./components/admin/ViewTaskPage";
 import ViewTaskUser from "./components/user/ViewTaskUser";
 import UserProfileView from "./components/Profile";
+import UserSharedTasks from "./components/user/UserSharedTasks";
 
 const AppRoutes = () => {
     const { user, authLoading } = useAuth();
@@ -22,7 +23,7 @@ const AppRoutes = () => {
     return (
         <Router>
             <Routes>
-                {/* <Route path="/" element={<Home />} /> */}
+                <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route element={<ProtectedRoute user={user} requiredRole="admin" />}>
@@ -35,6 +36,7 @@ const AppRoutes = () => {
                     <Route path="/user/dashboard" element={<Userdashboard />} />
                     <Route path="/user/tasks" element={<ViewTaskUser />} />
                     <Route path="/user/profile" element={<UserProfileView />} />
+                    <Route path="/user/shared-tasks" element={<UserSharedTasks/>} />
                 </Route>
 
             </Routes></Router>

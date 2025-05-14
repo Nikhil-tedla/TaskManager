@@ -36,7 +36,7 @@ const getUsers=async(req,res)=>{
     }
     catch(err){
         res.status(500).json(
-            {   messag:"Internal server error",
+            {   message:"Internal serve error",
                 error:err.message,
 
             }
@@ -56,24 +56,54 @@ const getUserById=async(req,res)=>{
     }
     catch(err){
         res.status(500).json(
-            {   messag:"Internal server error",
+            {   message:"Internal server error",
                 error:err.message,
 
             }
         )
     }
 }
-const deleteUserById=async(req,res)=>{
-    try{
 
+const getSharedTasks = async (req, res) => {
+    try {
+      const userId = req.user.id;
+  
+      
+    //   const users = await user.findById(userId).populate({
+    //     path: 'sharedTasks', 
+    //     populate: [
+    //         {
+    //           path: 'assignedTo', 
+    //           select: 'name' 
+    //         },
+            
+    //       ]
+    //   });
+    const users = await user.findById(userId).populate({
+        path: 'sharedTasks.taskId',
+        populate: {
+          path: 'assignedTo',
+          select: 'name'
+        }
+      }).populate({
+        path: 'sharedTasks.sharedBy',
+        select: 'name email'
+      });
+      
+      
+      
+      if (!users) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+     
+  
+      res.json(users.sharedTasks);
+  
+      
+    } catch (error) {
+      console.error("Error fetching shared tasks:", error);
+      res.status(500).json({ message: 'Server error' });
     }
-    catch(err){
-        res.status(500).json(
-            {   messag:"Internal server error",
-                error:err.message,
-
-            }
-        )
-    }
-}
-module.exports={getUserById,getUsers,deleteUserById}
+  };
+  
+module.exports={getUserById,getUsers,getSharedTasks}
